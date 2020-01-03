@@ -10,9 +10,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Optional;
 
+@SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
 public class VoteServiceTest {
 
@@ -43,7 +45,7 @@ public class VoteServiceTest {
 
     @Test
     public void shouldReturnAUserWhenReceiveAValidUser() {
-        User user = new User(1L, "giovane", "123");
+        User user = new User(1L, "test", "123");
         Optional<User> repoUser = userRepository.findById(user.getId());
 
         repoUser.ifPresent(value -> Assert.assertEquals(user, value));

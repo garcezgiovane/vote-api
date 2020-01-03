@@ -6,7 +6,6 @@ import com.challenge.db.entity.Restaurant;
 import com.challenge.db.entity.User;
 import com.challenge.db.entity.Vote;
 import com.challenge.db.exception.VoteException;
-import com.challenge.db.repository.RestaurantRepository;
 import com.challenge.db.repository.UserRepository;
 import com.challenge.db.repository.VoteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +20,16 @@ import java.util.Optional;
 @Service
 public class VoteService {
 
-    private RestaurantRepository restaurantRepository;
+    private RestaurantService restaurantService;
     private VoteRepository voteRepository;
     private UserRepository userRepository;
 
     @Autowired
-    public VoteService(RestaurantRepository restaurantRepository, VoteRepository voteRepository, UserRepository userRepository) {
-        this.restaurantRepository = restaurantRepository;
+    public VoteService(RestaurantService restaurantService, VoteRepository voteRepository, UserRepository userRepository) {
+        this.restaurantService = restaurantService;
         this.voteRepository = voteRepository;
         this.userRepository = userRepository;
+
     }
 
     public ResponseEntity<List<VoteResult>> getResult() {
@@ -45,18 +45,16 @@ public class VoteService {
     }
 
     private Restaurant findRestaurantByVoteResult(VoteResult voteResult) {
-        return restaurantRepository.findByName(voteResult.getRestaurantName());
+        return restaurantService.getRestaurantByName(voteResult.getRestaurantName());
     }
 
     private void recordTopRated(Restaurant restaurant) {
         restaurant.setSelected(Boolean.TRUE);
-        restaurantRepository.save(restaurant);
+        restaurantService.save(restaurant);
     }
 
     private VoteResult getTopRated(List<VoteResult> results) {
-        VoteResult voteResult = results.stream().max(Comparator.comparingLong(VoteResult::getAmountVotes)).get();
-        System.out.println(voteResult.getRestaurantName());
-        return voteResult;
+        return results.stream().max(Comparator.comparingLong(VoteResult::getAmountVotes)).get();
     }
 
     public ResponseEntity<?> vote(Long restaurantId, String username) throws Exception {
@@ -77,7 +75,7 @@ public class VoteService {
     }
 
     private Restaurant checkIfExistsRestaurant(Long restaurantId) throws VoteException {
-        return restaurantRepository.findById(restaurantId).orElseThrow(() ->
+        return restaurantService.getRestaurantById(restaurantId).orElseThrow(() ->
                 new VoteException("Restaurant not found"));
     }
 
